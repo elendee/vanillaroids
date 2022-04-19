@@ -1,0 +1,20 @@
+export declare class Stats {
+    REVISION: 16;
+    dom: HTMLDivElement;
+    domElement: HTMLDivElement;
+    setMode: (id: number) => void;
+    private mode;
+    private container;
+    private beginTime;
+    private prevTime;
+    private frames;
+    private fpsPanel;
+    private msPanel;
+    private memPanel;
+    constructor();
+    private addPanel(panel);
+    private showPanel(id);
+    begin(): void;
+    end(): number;
+    update(): void;
+}
