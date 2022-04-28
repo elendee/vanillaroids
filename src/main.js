@@ -7,7 +7,7 @@ import { DRACOLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H
 import { DecalGeometry } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples//jsm/geometries/DecalGeometry.js";
 import { LightProbeGenerator } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/lights/LightProbeGenerator.js";
 import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
-import Stats from "../node_modules/stats-js/src/Stats";
+// import Stats from "../node_modules/stats-js/src/Stats";
 import { saveDynamicDataToFile } from "./list_printer.js";
 
 
