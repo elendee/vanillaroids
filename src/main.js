@@ -24,7 +24,7 @@ import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
 import { saveDynamicDataToFile } from "./list_printer.js";
 
 
-const DRACO_LOADER = new DRACOLoader();
+// const DRACO_LOADER = new DRACOLoader();
 
 //Declare global variables
 let renderer, scene, camera; 
