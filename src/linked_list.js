@@ -137,8 +137,6 @@ class linkedList {
         boulderString =
           boulderString +
           "\n" +
-          current.ID +
-          "   :    " +
           current.Nlng +
           "\t" +
           current.Nlat +

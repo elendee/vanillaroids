@@ -1,29 +1,17 @@
-/***
- * 
- * A Web based Gltf loader that uese PANGU to allow 
- * Users to edit asteroid models.
- * 
- * 
- */
-
 
 //Import the gltf loader, orbit controls and THREE
-// import * as THREE from "https://cdn.skypack.dev/three@0.133.0";
-// import { OrbitControls } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/controls/OrbitControls.js";
-// import { GLTFLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/GLTFLoader.js";
-// import { DecalGeometry } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples//jsm/geometries/DecalGeometry.js";
-// import { LightProbeGenerator } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/lights/LightProbeGenerator.js";
-// import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
-// import { Stats } from "../node_modules/stats-js/build/stats.min.js";
-
-import * as THREE from "../node_modules/three/build/three.module.js";
-import { OrbitControls } from "../node_modules/three/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "../node_modules/three/examples/jsm/loaders/GLTFLoader.js";
-import { DecalGeometry } from "../node_modules/three/examples/jsm/geometries/DecalGeometry.js";
-import { LightProbeGenerator } from "../node_modules/three/examples/jsm/lights/LightProbeGenerator.js";
-import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
+import * as THREE from "https://cdn.skypack.dev/three@0.133.0";
+import { OrbitControls } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/DRACOLoader.js";
+import { DecalGeometry } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples//jsm/geometries/DecalGeometry.js";
+import { LightProbeGenerator } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/lights/LightProbeGenerator.js";
+import GUI from "lil-gui";
+import Stats from "../node_modules/stats-js/src/Stats";
+import { saveDynamicDataToFile } from "./list_printer";
 
 
+const DRACO_LOADER = new DRACOLoader();
 
 //Declare global variables
 let renderer, scene, camera; 
@@ -34,46 +22,42 @@ var axesHelper;
 var Glat, Glng;
 var choice = 1;
 var place_size = 1;
+var place_size2 = 1;
 var place_mode = 0;
 let rockID = 0;
 const rockList = [];
 let selectedObject = [];
 
-
-//Testing
 var place_mode;
 var StringTest;
 var StringTest2;
 let settings;
+let mouseHelper;
 
-export { StringTest2 as StringTest2 };
-export { StringTest as StringTest };
-import { saveDynamicDataToFile } from "./list_printer.js";
+const size = new THREE.Vector3(8, 8, 8);
+const mouse = new THREE.Vector2();
+const position = new THREE.Vector3();
+const orientation = new THREE.Euler();
+const intersects = [];
 
-//intersection point on the mesh
+//Intersection point on the mesh
 const intersection = {
   intersects: false,
   point: new THREE.Vector3(),
   normal: new THREE.Vector3(),
 };
 
-const mouse = new THREE.Vector2();
-const intersects = [];
-let mouseHelper;
-const position = new THREE.Vector3();
-const orientation = new THREE.Euler();
-//const gui = new GUI({ width: 460})
-
-const size = new THREE.Vector3(8, 8, 8);
+//Decal Paramiters
 const params = {
-  minScale: 10,
-  maxScale: 100,
-  rotate: true,
-  clear: function () {
-    removeDecals();
-  },
-};
+    minScale: 10,
+    maxScale: 100,
+    rotate: true,
+    clear: function () {
+      removeDecals();
+    },
+  };
 
+//Lighting
 let lightProbe;
 let directionalLight;
 let ambientLight;
@@ -86,145 +70,114 @@ const light_Settings = {
   ambientLightColour: 0xffffff,
 };
 
+//fps/mbs logger
 const stats = Stats({ autoPlace: false, width: 20 });
 document.body.appendChild(stats.dom);
-stats.domElement.style.cssText =
-  "position: fixed; bottom: 0; right: 100;cursor:pointer;opacity:0.9;z-index:10000";
+stats.domElement.style.cssText = "position: fixed; bottom: 0; right: 100;cursor:pointer;opacity:0.9;z-index:10000";
 
-//Initialisation(); //run initialisation function
 
-/*
-function Mode_Update(){
-  filter.addEventListener('change', filterChanged);
-  var choice = document.getElementById("modepicker");
-  var place_mode = choice.value;
-  console.log(choice);
-}
-*/
 
-window.Mode_Update = function () {
-  filter.addEventListener("change", filterChanged);
-  var choice = document.getElementById("modepicker");
-  var place_mode = choice.value;
-  console.log(choice);
-};
-
-window.onload = function () {
-  choice = document.getElementById("modepicker");
-  console.log(choice);
-};
-/*
-//changes the range slider number
-window.rangeSlide = function (value) {
-  document.getElementById("rangeValue").innerHTML = value;
-  place_size = value;
-  //console.log(place_size);
-};
-*/
-window.printList = function (StringTest) {
-  document.getElementById("Coord_List").value = StringTest;
-};
-
-window.reload = function () {
-  Initialisation();
-};
-
+//==========================================================================================================================
+//Initialisation Function for ThreeJS scene.
 function Initialisation() {
-  document.getElementById("loaded").style.visibility = "hidden";
-  document.getElementById("zone").style.visibility = "hidden";
-  //choice = document.getElementById('newone');
-  // console.log(choice);
-  createPanel();
-  // Renderer for the actual obejct contatiner.
-  renderer = new THREE.WebGLRenderer();
 
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
-  document.body.appendChild(renderer.domElement);
+    //Removes the file loading element
+    document.getElementById("loaded").style.visibility = "hidden";
+    document.getElementById("zone").style.visibility = "hidden";
 
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.NoToneMapping;
+    //loads GUI
+    createPanel();
 
-  // Scene
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x000000);
+    // Renderer for the obejct contatiner.
+    renderer = new THREE.WebGLRenderer({ antialias : false, powerPreference: "high-performance"});
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    document.body.appendChild(renderer.domElement);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.NoToneMapping;
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    1,
-    5000
-  );
-  camera.position.set(0, 0, 300);
-  scene.add(camera);
+    //Lower résolution
+    renderer.setPixelRatio( window.devicePixelRatio * 1.0 );
 
-  axesHelper = new THREE.AxesHelper(2000);
-  axesHelper.position.set(0, 0, 0);
-  scene.add(axesHelper);
-  axesHelper.visible = false;
+     // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xd2d4d6);
 
-  // probe
-  lightProbe = new THREE.LightProbe();
-  scene.add(lightProbe);
-
-  // light
-  directionalLight = new THREE.DirectionalLight(
-    light_Settings.directionalLightColour,
-    light_Settings.directionalLightIntensity
-  );
-  directionalLight.position.set(10, 10, 10);
-  scene.add(directionalLight);
-
-  //ambiant
-   ambientLight = new THREE.AmbientLight(
-     light_Settings.ambientLightColour, 
-    light_Settings.ambientLightIntensity
+    // Camera
+    camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        1,
+        5000
     );
-   scene.add(ambientLight);
-  // Geometry
-  // TODO : I think this is to help in drawing the line but I need look at this currently it just works
-  const geometry = new THREE.BufferGeometry();
-  geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    camera.position.set(0, 0, 300);
+    scene.add(camera);
 
-  // Line
-  // Add the line marker for the mouse
-  //TODO: hide the currsor when you are on the body containing the model as it gets confusing.
-  line = new THREE.Line(
-    geometry,
-    new THREE.LineBasicMaterial({ color: 0xffff00 })
-  );
-  scene.add(line);
+    //Axis Helper
+    axesHelper = new THREE.AxesHelper(2000);
+    axesHelper.position.set(0, 0, 0);
+    scene.add(axesHelper);
+    axesHelper.visible = false;
 
-  const raycaster = new THREE.Raycaster(); //raycast for the model
-  const pointer = new THREE.Vector2(); // where the mouse is in screen space*
+    //Probe Light
+    lightProbe = new THREE.LightProbe();
+    scene.add(lightProbe);
 
-  // Mouse Helper
-  // This was used in the Decal example It makes sure the intersection postion from the mouse is more uniform.
-  // it places a box object at the intersection point, currently set to not visable is im not sure its needed.
-  mouseHelper = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 10),
-    new THREE.MeshBasicMaterial({ color: 0xffff00 })
-  );
-  //mouseHelper.setColor(0xFFFFFF);
-  mouseHelper.visible = true;
-  //mouseHelper.userData.asteroid = true;
-  scene.add(mouseHelper);
+    //Directional Light
+    directionalLight = new THREE.DirectionalLight(
+        light_Settings.directionalLightColour,
+        light_Settings.directionalLightIntensity
+    );
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
 
-  // Controls
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.addEventListener("change", Animation);
+    //Ambiant Light
+    ambientLight = new THREE.AmbientLight(
+        light_Settings.ambientLightColour, 
+        light_Settings.ambientLightIntensity
+        );
+    scene.add(ambientLight);
 
-  controls.minDistance = 100;
-  controls.maxDistance = 2000;
-  controls.enablePan = false;
+    //Mouse Helper Settings
 
+    //Buffer Geometry
+    const geometry = new THREE.BufferGeometry();
+    geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
 
-  //loads the model this is okay for prototype purposes but will need to be dynamic and probably enterned by the user.
-  // let model = "models/Vesta_1_100.glb";
-  GLTF_Loader(); // Call the loader function.
+    //Helper Line
+    line = new THREE.Line(
+        geometry,
+        new THREE.LineBasicMaterial({ color: 0xffff00 })
+    );
+    scene.add(line);
 
-  //Intersection check function
-  function Check_Intersection(x, y) {
+    const raycaster = new THREE.Raycaster(); //raycast for the model
+    const pointer = new THREE.Vector2(); // where the mouse is in screen space
+
+    // Mouse Helper
+    mouseHelper = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 10),
+        new THREE.MeshBasicMaterial({ color: 0xffff00 })
+      );
+      mouseHelper.visible = true;
+      scene.add(mouseHelper);
+
+    //Camera Controls Parameters
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.addEventListener("change", Animation);
+
+    controls.minDistance = 100;
+    controls.maxDistance = 2000;
+    controls.enablePan = false;
+
+    // Call the loader function.
+    GLTF_Loader(); 
+
+    
+
+//==========================================================================================================================
+    //Intersection check function
+    function Check_Intersection(x, y) {
+
     //Checks there is a mesh.
     if (mesh === undefined) return;
 
@@ -240,135 +193,173 @@ function Initialisation() {
     raycaster.intersectObject(mesh, false, intersects);
 
     if (intersects.length > 0) {
-      // If the target is greater than 0.
-      const p = intersects[0].point;
-      mouseHelper.position.copy(p); // Copies the the box postition to p.
-      intersection.point.copy(p); // Copies the the intersection point postition to p.
-
-      const n = intersects[0].face.normal.clone(); // Clones the face noramls of the intersect point into n.
-      n.transformDirection(mesh.matrixWorld); // Transform of the object.
-      n.multiplyScalar(10); // Multiply by 10.
-      n.add(intersects[0].point); // Add as a child.
-
-      intersection.normal.copy(intersects[0].face.normal);
-      mouseHelper.lookAt(n); //n is the world space for the helper box.
-
-      const positions = line.geometry.attributes.position; //move the line position
-      positions.setXYZ(0, p.x, p.y, p.z);
-      positions.setXYZ(1, n.x, n.y, n.z);
-      positions.needsUpdate = true;
-
-      intersection.intersects = true;
-      intersects.length = 0;
-    } else {
-      intersection.intersects = false;
-    }
-  }
-  window.addEventListener("resize", Window_Resize);
-
-  let moved = false;
-  controls.addEventListener("change", function () {
-    moved = true;
-  });
-
-  window.addEventListener("pointerdown", function () {
-    moved = false;
-  });
-
-  window.addEventListener("pointerup", function (event) {
-    // console.log(mouse.x, ", ", mouse.y);
-    if (event.shiftKey) {
-      if (moved === false) {
-        Check_Intersection(event.clientX, event.clientY);
-        if (intersection.intersects && place_mode == 1) {
-          //&& choice.value == 1) {
-          // console.log(mouseHelper.position);
-          place();
-
-          //   document.getElementById("List").value = StringTest2;
-
-          list.insertFirst(2, Glat, Glng, 40, 0, 1);
-          console.log(StringTest2);
-
-          //   Coordinates_Converter();
-        } else if (intersection.intersects && place_mode == 0) {
-          const loader = new GLTFLoader();
-          var rockID = 0;
-
-          loader.load("models/Bennu_1_1.glb", function (gltf) {
-            rockmesh = gltf.scene.children[0];
-
-            const uuid = rockmesh.uuid;
-            rockList[uuid] = {
-              model: gltf,
-              mydata: {
-                userPlaced: true,
-                //place: holder,
-              },
-            };
-            rockID = uuid;
-            rockmesh.position.set(
-              mouseHelper.position.x,
-              mouseHelper.position.y,
-              mouseHelper.position.z
-            );
-
-            rockmesh.material = new THREE.MeshBasicMaterial({
-              color: 0xffff00,
-              wireframe: false,
-              opacity: 0.5,
-              transparent: true,
-            });
-            rockmesh.material.opacity = 0.5;
-
-            rockmesh.userData.draggable = true;
-            rockmesh.userData.moved = false;
-            rockmesh.userData.asteroid = false;
-
-            scene.add(rockmesh);
-
-            rockmesh.scale.set(
-              place_size / 100,
-              place_size / 100,
-              place_size / 100
-            );
-
-            sizeCheck();
-            console.log(rockmesh.uuid, "  :  ", Glng, " , ", Glat);
-            //  list.insertFirst(rockID, 1, Glat, Glng, 40, 0, 1);
-          });
-
-          // await 1;
-          Coordinates_Converter();
-
-          settings.X_Coordinate = mouseHelper.position.x;
-          settings.Y_Coordinate = mouseHelper.position.y;
-          settings.Z_Coordinate = mouseHelper.position.z;
-
-          settings.Latitude = Glat;
-          settings.Longitude = Glng;
-
-          //add to list
-          // object.userData.draggable
-        }
-        else if (intersection.intersects && place_mode == 1) {
-          place();
-        }
+        // If the target is greater than 0.
+        const p = intersects[0].point;
+        mouseHelper.position.copy(p); // Copies the the box postition to p.
+        intersection.point.copy(p); // Copies the the intersection point postition to p.
+  
+        const n = intersects[0].face.normal.clone(); // Clones the face noramls of the intersect point into n.
+        n.transformDirection(mesh.matrixWorld); // Transform of the object.
+        n.multiplyScalar(10); // Multiply by 10.
+        n.add(intersects[0].point); // Add as a child.
+  
+        intersection.normal.copy(intersects[0].face.normal);
+        mouseHelper.lookAt(n); //n is the world space for the helper box.
+  
+        const positions = line.geometry.attributes.position; //move the line position
+        positions.setXYZ(0, p.x, p.y, p.z);
+        positions.setXYZ(1, n.x, n.y, n.z);
+        positions.needsUpdate = true;
+  
+        intersection.intersects = true;
+        intersects.length = 0;
+      } else {
+        intersection.intersects = false;
       }
     }
-  });
+//==========================================================================================================================
+    //Event Listners
+    window.addEventListener("resize", Window_Resize);
+    let moved = false;
+    
 
-  window.addEventListener("pointermove", onPointerMove);
+    controls.addEventListener("change", function () {
+    moved = true;
+    });
 
-  function onPointerMove(event) {
-    if (event.isPrimary) {
-      Check_Intersection(event.clientX, event.clientY);
+    window.addEventListener("pointerdown", function () {
+    moved = false;
+    });
+
+//==========================================================================================================================
+    //Place On Shift Click
+    window.addEventListener("pointerup", function (event) {
+
+        if (event.shiftKey) {
+            if (moved === false) {
+
+                Check_Intersection(event.clientX, event.clientY); //Check It's Hit
+                //Place Crater
+                if (intersection.intersects && place_mode == 1) { 
+
+                position.copy(intersection.point);
+                orientation.copy(mouseHelper.rotation);
+                
+                if (params.rotate) orientation.z = Math.random() * 2 * Math.PI;
+
+                const scale = place_size2 + 10;
+                size.set(scale, scale, scale);
+
+                const texture = new THREE.TextureLoader().load( 'images/marker_mask5.png' );
+
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xffff00,
+                    map: texture,
+                    alphaTest: 0.5,
+                  });
+
+                //This stuff stops the z fighting.
+                material.polygonOffset = true;
+                material.depthTest = true;
+                material.polygonOffsetFactor = -4;
+                material.polygonOffsetUnits = 0.1;
+                
+                const m = new THREE.Mesh(
+                    new DecalGeometry(mesh, position, orientation, size),
+                    material
+                  );
+
+                  m.userData.draggable = true;
+                  scene.add(m);
+                
+                Coordinates_Converter(); // convert X,Y,Z to Lng And Lat
+
+                settings.X_Coordinate = mouseHelper.position.x; //Update Placement Info
+                settings.Y_Coordinate = mouseHelper.position.y;
+                settings.Z_Coordinate = mouseHelper.position.z;
+                settings.Latitude = Glat;
+                settings.Longitude = Glng;
+
+                list.insertFirst(obj.uuid, 2, Glng, Glat, 1020 + place_size2 , 0, 1);
+
+                }
+
+                //Place Rock
+                else if (intersection.intersects && place_mode == 0) {
+
+                    const loader = new GLTFLoader();
+                    var rockID = 0;
+
+                    loader.load("models/Bennu_1_1.glb", function (gltf) { //load rock model
+                        rockmesh = gltf.scene.children[0];
+                        const uuid = rockmesh.uuid; // Add Unique Identifier
+
+                        rockList[uuid] = {
+                            model: gltf,
+                            mydata: {
+                              userPlaced: true,
+                            },
+                          };
+                        rockID = uuid;
+
+                        //Place at Mouse Intersection Position
+                        rockmesh.position.set( 
+                            mouseHelper.position.x,
+                            mouseHelper.position.y,
+                            mouseHelper.position.z
+                          );
+
+                        rockmesh.material = new THREE.MeshBasicMaterial({
+                            color: 0xffff00,
+                            wireframe: false,
+                            opacity: 0.5,
+                            transparent: true,
+                        });
+                        rockmesh.material.opacity = 0.5;
+
+                        //Set Rock User Data
+                        rockmesh.userData.draggable = true;
+                        rockmesh.userData.moved = false;
+                        rockmesh.userData.asteroid = false;
+
+                        scene.add(rockmesh);
+
+                        rockmesh.scale.set(
+                            place_size / 1000,
+                            place_size / 1000,
+                            place_size / 1000
+                          );
+
+                        console.log(rockmesh.uuid, "  :  ", Glng, " , ", Glat);
+
+                    });
+
+                    Coordinates_Converter(); // convert X,Y,Z to Lng And Lat
+
+                    settings.X_Coordinate = mouseHelper.position.x; //Update Placement Info
+                    settings.Y_Coordinate = mouseHelper.position.y;
+                    settings.Z_Coordinate = mouseHelper.position.z;
+                    settings.Latitude = Glat;
+                    settings.Longitude = Glng;
+                }
+            }
+        }
+
+    });
+
+    window.addEventListener("pointermove", onPointerMove);
+
+    function onPointerMove(event) {
+        if (event.isPrimary) {
+        Check_Intersection(event.clientX, event.clientY);
+        }
     }
-  }
-  Animation();
 
-  window.addEventListener("resize", Window_Resize);
+    Animation();
+
+    window.addEventListener("resize", Window_Resize);
 }
+
 
 /**
  * converts a XYZ THREE.Vector3 to longitude latitude. beware, the vector3 will be normalized!
@@ -391,10 +382,7 @@ function Coordinates_Converter() {
 
   cube.position.normalize(); // removes decimal places for the vector
 
-  // console.log(cube.position.x, cube.position.y, cube.position.z);
-  //longitude = angle of the vector around the Y axis
-  //-( ) : negate to flip the longitude (3d space specific )
-  //- PI / 2 to face the Z axis
+ 
   var lng = -Math.atan2(-cube.position.z, -cube.position.x) - Math.PI / 2;
 
   //to bind between -PI / PI
@@ -425,8 +413,7 @@ function Coordinates_Converter() {
   Glat = lat;
   Glng = lng;
 
-  //document.getElementById("mLNG").value = Glng;
-  //document.getElementById("mLAT").value = Glat;
+
   console.log("long and lat : ", lng, lat);
 
   return [lng, lat];
@@ -435,16 +422,17 @@ function Coordinates_Converter() {
 //loads fiels in a gltf format
 function GLTF_Loader() {
   const loader = new GLTFLoader();
+  loader.parse(obj, "", (glb) => {
+    mesh = glb.scene.children[0];
 
-  loader.parse(obj, "", (gltf) => {
-    mesh = gltf.scene.children[0];
-
+    mesh.scale.set(0.005, 0.005, 0.005);
     scene.add(mesh);
-    mesh.scale.set(0.5, 0.5, 0.5);
+    
     mesh.userData.asteroid = true;
 
+
     mesh.traverse((child) => {
-      //   console.log("element: ", child.name, child.scale);
+
     });
   });
 }
@@ -461,12 +449,10 @@ function place() {
   const material = new THREE.MeshBasicMaterial({
     color: 0xffff00,
     map: THREE.ImageUtils.loadTexture("images/marker_mask5.png"),
-    //opacity: 0.5,
-    //transparent: true,
+
     alphaTest: 0.5,
   });
 
-  //material.color.setHex( 0xfc0303 );
 
   //This stuff stops the z fighting.
   material.polygonOffset = true;
@@ -479,11 +465,10 @@ function place() {
     material
   );
   m.userData.draggable = true;
-  //  const m = new THREE.Mesh( new THREE.BoxGeometry( 100,100,100), new THREE.MeshNormalMaterial());
-  // m.position.set(position);
-  // decals.push( m );
+
   scene.add(m);
   console.log(m.scale);
+
 }
 
 //Updates on Window Resize
@@ -536,14 +521,7 @@ const rockRaycaster = new THREE.Raycaster();
 const clickMouse = new THREE.Vector2();
 const mouseMove = new THREE.Vector2();
 var draggable = new THREE.Object3D();
-/*
-function addSelectedObject( object ) {
 
-  selectedObject = [];
-  selectedObject.push( object );
-
-}
-*/
 window.addEventListener(
   "contextmenu",
   function (event) {
@@ -572,16 +550,7 @@ window.addEventListener(
       draggable = found[0].object;
       found[0].object.material.opacity = 0.9;
       found[0].object.userData.moved = true;
-      /*
-      const sObject = found[ 0 ].object;
-						addSelectedObject( sObject );
-						outlinePass.selectedObjects = selectedObject;
-      */
-      console.log(
-        found[0].object.uuid,
-        " : Has been moved"
-        // found[0].object.userData.moved
-      );
+
     }
   },
   false
@@ -606,11 +575,7 @@ function dragObject() {
           draggable.position.y = mouseHelper.position.y;
           draggable.position.z = mouseHelper.position.z;
 
-          /*
-          draggable.position.x = o.point.x;
-          draggable.position.y = o.point.y;
-          draggable.position.z = o.point.z;
-          */
+
         }
       }
     }
@@ -622,7 +587,6 @@ window.locationUpdater = function () {
     if (obj.userData.asteroid == false) {
       obj.position.normalize();
 
-      //  console.log(obj.position.x, obj.position.y, obj.position.z);
 
       var lng = -Math.atan2(-obj.position.z, -obj.position.x) - Math.PI / 2;
 
@@ -643,9 +607,9 @@ window.locationUpdater = function () {
         lng = lng + 360;
       }
 
-      console.log(obj.uuid, "  :  ", lat, " , ", lng);
-
-      list.insertFirst(obj.uuid, 1, lat, lng, 40, 0, 1);
+      console.log(obj.uuid, "  :  ", lat, " , ", lng, " = ", obj.scale);
+      //scale is set here from the object's mesh scale and then normalised for pangu.
+      list.insertFirst(obj.uuid, 1, lng, lat, obj.scale.x * 1000 + 400, 0, 1);
     }
   });
 
@@ -660,9 +624,7 @@ function sizeCheck() {
   boundsBox.setFromObject(mesh, true);
 
   scene.add(helper);
-  //console.log(helper.scale.x + "  " + helper.scale.y + "  " + helper.scale.z);
 
-  //console.log();
   scene.remove(helper);
 }
 
@@ -685,7 +647,8 @@ function createPanel() {
     'Wireframe': false,
     'AxesHelper': false,
     'Export Lists': exportLists,
-    "Object Size": 1,
+    "Rock Size": 1,
+    "Crater Size": 1,
     "Object Type": "Rock",
     //Placement Info
     'X_Coordinate': xcoord,
@@ -694,17 +657,18 @@ function createPanel() {
     'Latitude': Nlat,
     'Longitude': Nlng,
     //colours
-    'Background_Colour': "rgb(0,0,0)",
-    'Ambient_Light': 1.5,
+    'Background_Colour': "rgb(210,212,214)",
+    'Ambient_Light': 1.0,
     'Direct_Light': 1.5,
     'Probe_Light': 1.5,
-    'Ambient_Colour': "rgb(255,255,255)",
-    'Direct_Colour': "rgb(255,255,255)",
+    'Ambient_Colour': "rgb(53,34,122)",
+    'Direct_Colour': "rgb(255,68,0)",
   };
 
   folder1.add(settings, "Wireframe").onChange(modelWireframe);
   folder1.add(settings, "AxesHelper").onChange(axisHelper);
-  folder1.add(settings, "Object Size", 1.0, 10.0, 1.0).onChange(sizeSlider);
+  folder1.add(settings, "Rock Size", 1.0, 60.0, 1.0).onChange(sizeSlider);
+  folder1.add(settings, "Crater Size", 1.0, 60.0, 1.0).onChange(sizeSlider2);
   folder1.add(settings, "Object Type", ["Rock", "Crater"]).onChange(TypePicker);
 
 
@@ -732,6 +696,9 @@ function createPanel() {
   function sizeSlider(rockSize) {
     place_size = rockSize;
   }
+  function sizeSlider2(craterSize) {
+    place_size2 = craterSize;
+  }
   function TypePicker(placeType) {
     if (placeType == "Rock") place_mode = 0;
     else place_mode = 1;
@@ -741,7 +708,6 @@ function createPanel() {
   }
 
   function axisHelper(choice) {
-    // var AxischeckBox = document.getElementById("axis");
 
     if (choice == true) {
       axesHelper.visible = true;

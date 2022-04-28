@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head style="background-color:#181c24">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/svg+xml" href="./images/Plogo.png" />
+    <link rel="icon" href="http://example.com/favicon.png" />
+
+    <link rel="stylesheet" href="./css/style.css">
+
+	<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"three": "./node_modules/three/build/three.module.js"
+			}
+		}
+	</script>    
+
+    <script src="https://cdn.jsdelivr.net/g/filesaver.js"></script>
+    <script src="./src/node.js"></script>
+    <script src="./src/linked_list.js"></script>
+    <!-- <script type="module" src="./src/list_printer.js" defer='defer'></script> -->
+    <script src='./node_modules/stats-js/build/stats.min.js'></script>
+
+    <title>Asteroid Prototype</title>
+  </head>
+
+  <body style="background-color:#000000">
+  	
+    <header>
+      <div class = logoImage>
+        <a href="./index.html">
+      <img src="./images/logo2.png">
+    </a>
+    </div>
+
+    </header>
+
+    <div class = drop-zone id = "zone">
+      <span class="drop-zone__prompt">Drop file here or click to upload</span>
+      <input type="file" id="loaded" class="drop-zone__input"/>
+    </div> 
+
+    <script src="./src/file_uploader.js"></script>
+
+
+   <script type="module" async src="./src/main.js" defer='defer'></script>
+
+  </body>
+</html>
