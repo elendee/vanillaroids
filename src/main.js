@@ -1,12 +1,25 @@
 
 //Import the gltf loader, orbit controls and THREE
-import * as THREE from "https://cdn.skypack.dev/three@0.133.0";
-import { OrbitControls } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/DRACOLoader.js";
-import { DecalGeometry } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples//jsm/geometries/DecalGeometry.js";
-import { LightProbeGenerator } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/lights/LightProbeGenerator.js";
+// import * as THREE from "https://cdn.skypack.dev/three@0.133.0";
+
+
+//Import the gltf loader, orbit controls and THREE
+// import * as THREE from "https://cdn.skypack.dev/three@0.133.0";
+// import { OrbitControls } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/controls/OrbitControls.js";
+// import { GLTFLoader } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/loaders/GLTFLoader.js";
+// import { DecalGeometry } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples//jsm/geometries/DecalGeometry.js";
+// import { LightProbeGenerator } from "https://cdn.skypack.dev/pin/three@v0.133.0-mRqtjW5H6POaf81d9bnr/mode=imports/unoptimized/examples/jsm/lights/LightProbeGenerator.js";
+// import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
+// import { Stats } from "../node_modules/stats-js/build/stats.min.js";
+
+import * as THREE from "../node_modules/three/build/three.module.js";
+import { OrbitControls } from "../node_modules/three/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "../node_modules/three/examples/jsm/loaders/GLTFLoader.js";
+import { DecalGeometry } from "../node_modules/three/examples/jsm/geometries/DecalGeometry.js";
+import { LightProbeGenerator } from "../node_modules/three/examples/jsm/lights/LightProbeGenerator.js";
 import GUI from "../node_modules/lil-gui/dist/lil-gui.esm.min.js";
+
+
 // import Stats from "../node_modules/stats-js/src/Stats";
 import { saveDynamicDataToFile } from "./list_printer.js";
 
